@@ -1,18 +1,9 @@
 // ==========================================
 // ESTADO GLOBAL Y VARIABLES
 // ==========================================
-const coloresRuleta = [
-  "#FF6384",
-  "#36A2EB",
-  "#FFCE56",
-  "#4BC0C0",
-  "#9966FF",
-  "#FF9F40",
-  "#E7E9ED",
-  "#71B37C",
-];
+const coloresRuleta = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
 
-let opcionesRuleta = ["Opción 1", "Opción 2", "Opción 3", "Opción 4"];
+let opcionesRuleta = [];
 let anguloActual = 0;
 let estaGirando = false;
 let idAnimacion = null;
@@ -58,6 +49,29 @@ const botonVolverSorteo = document.getElementById("botonVolverSorteo");
 // ==========================================
 // INTEGRANTE 2: LÓGICA DE LA RULETA
 // ==========================================
+
+function cargarOpcionesRuleta() {
+  const guardado = localStorage.getItem("opcionesRuleta");
+  if (guardado) {
+    areaTextoRuleta.value = guardado;
+  } else {
+    areaTextoRuleta.value = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12";
+  }
+  actualizarOpcionesDesdeTextarea();
+}
+
+function actualizarOpcionesDesdeTextarea() {
+  if (!areaTextoRuleta) return;
+  const contenido = areaTextoRuleta.value;
+  localStorage.setItem("opcionesRuleta", contenido);
+
+  const lineas = contenido
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  opcionesRuleta = lineas;
+  dibujarRuleta();
+}
 
 function dibujarRuleta() {
   if (!ctx) return;
@@ -161,7 +175,10 @@ function ocultarElementoSeleccionado() {
   const indice = opcionesRuleta.indexOf(ganadorActual);
   if (indice !== -1) {
     opcionesRuleta.splice(indice, 1);
-    if (areaTextoRuleta) areaTextoRuleta.value = opcionesRuleta.join("\n");
+    if (areaTextoRuleta) {
+      areaTextoRuleta.value = opcionesRuleta.join("\n");
+      localStorage.setItem("opcionesRuleta", areaTextoRuleta.value);
+    }
     textoRespuesta.textContent = "---";
     dibujarRuleta();
   }
@@ -169,21 +186,12 @@ function ocultarElementoSeleccionado() {
 
 function reiniciarRuleta() {
   if (areaTextoRuleta) {
-    areaTextoRuleta.value = "Opción 1\nOpción 2\nOpción 3\nOpción 4";
+    areaTextoRuleta.value = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12";
+    localStorage.setItem("opcionesRuleta", areaTextoRuleta.value);
     actualizarOpcionesDesdeTextarea();
   }
   if (textoRespuesta) textoRespuesta.textContent = "---";
   if (superposicionGirar) superposicionGirar.style.display = "block";
-}
-
-function actualizarOpcionesDesdeTextarea() {
-  if (!areaTextoRuleta) return;
-  const lineas = areaTextoRuleta.value
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
-  opcionesRuleta = lineas;
-  dibujarRuleta();
 }
 
 // Atajos de teclado (SPACE, S, R, E, F)
@@ -217,7 +225,6 @@ if (botonIniciarRuleta)
 if (botonReiniciarRuleta)
   botonReiniciarRuleta.addEventListener("click", reiniciarRuleta);
 if (areaTextoRuleta) {
-  areaTextoRuleta.value = opcionesRuleta.join("\n");
   areaTextoRuleta.addEventListener("input", actualizarOpcionesDesdeTextarea);
 }
 
@@ -244,22 +251,47 @@ function cambiarPestana(nombrePestana) {
   }
 }
 
+function cargarParticipantesSorteo() {
+  const guardado = localStorage.getItem("participantesSorteo");
+  if (guardado) {
+    areaTextoParticipantes.value = guardado;
+  }
+  actualizarContadorYDesplegable();
+}
+
 function actualizarContadorYDesplegable() {
   if (!areaTextoParticipantes) return;
-  const lineas = areaTextoParticipantes.value
+
+  // Limitar cada línea a un máximo de 50 caracteres
+  let lineasOriginales = areaTextoParticipantes.value.split("\n");
+  let lineasRecortadas = lineasOriginales.map((l) => l.substring(0, 50));
+
+  if (lineasOriginales.some((l, i) => l !== lineasRecortadas[i])) {
+    areaTextoParticipantes.value = lineasRecortadas.join("\n");
+  }
+
+  // Guardar en localStorage
+  localStorage.setItem("participantesSorteo", areaTextoParticipantes.value);
+
+  const lineasValidas = areaTextoParticipantes.value
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
-  if (contadorCantidad) contadorCantidad.textContent = lineas.length;
+
+  // Limitar a máximo 100 participantes
+  const cantidadTotal = Math.min(lineasValidas.length, 100);
+  if (contadorCantidad) contadorCantidad.textContent = cantidadTotal;
 
   if (!desplegableOpcionesDivision) return;
   desplegableOpcionesDivision.innerHTML = "";
-  const maxOpciones = Math.max(1, lineas.length);
+  const maxOpciones = Math.max(1, cantidadTotal);
 
   for (let i = 1; i <= maxOpciones; i++) {
     const opcion = document.createElement("option");
     opcion.value = i;
-    opcion.textContent = i;
+    opcion.textContent = radioCantidadEquipos.checked
+      ? `${i} equipos`
+      : `${i} por equipo`;
     desplegableOpcionesDivision.appendChild(opcion);
   }
 }
@@ -269,7 +301,8 @@ function generarEquipos() {
   const lineas = areaTextoParticipantes.value
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0);
+    .filter((l) => l.length > 0)
+    .slice(0, 100);
 
   if (lineas.length === 0) {
     alert("Por favor, ingresa al menos un participante.");
@@ -349,12 +382,23 @@ if (areaTextoParticipantes)
     "input",
     actualizarContadorYDesplegable,
   );
+if (radioCantidadEquipos)
+  radioCantidadEquipos.addEventListener(
+    "change",
+    actualizarContadorYDesplegable,
+  );
+if (radioParticipantesPorEquipo)
+  radioParticipantesPorEquipo.addEventListener(
+    "change",
+    actualizarContadorYDesplegable,
+  );
 if (botonGenerarEquipos)
   botonGenerarEquipos.addEventListener("click", generarEquipos);
 if (botonLimpiarSorteo) {
   botonLimpiarSorteo.addEventListener("click", () => {
     areaTextoParticipantes.value = "";
     campoTituloSorteo.value = "";
+    localStorage.removeItem("participantesSorteo");
     actualizarContadorYDesplegable();
   });
 }
@@ -367,6 +411,6 @@ if (botonVolverSorteo) {
 
 // Inicialización
 window.addEventListener("DOMContentLoaded", () => {
-  dibujarRuleta();
-  actualizarContadorYDesplegable();
+  cargarOpcionesRuleta();
+  cargarParticipantesSorteo();
 });

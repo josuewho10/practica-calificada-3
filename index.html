@@ -1,1 +1,165 @@
-<!DOCTYPE html><html><head><title>Aula Virtual</title></head><body><h1>Proyecto Aula Virtual</h1></body></html>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aula Virtual - Ruleta y Sorteo de Equipos</title>
+    <link rel="stylesheet" href="estilos.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Aula Virtual - Desarrollo de Aplicaciones Web</h1>
+      <nav class="navegacion-pestanas">
+        <button
+          id="botonPestanaRuleta"
+          class="activo"
+          onclick="cambiarPestana('ruleta')"
+        >
+          1. Ruleta Dinámica
+        </button>
+        <button id="botonPestanaSorteo" onclick="cambiarPestana('sorteo')">
+          2. Sorteo de Equipos
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- SECCIÓN 1: RULETA DINÁMICA -->
+      <section id="seccionRuleta" class="seccion-pestana activa">
+        <div class="contenedor-respuesta">
+          <h2>RESPUESTA: <span id="textoRespuesta">---</span></h2>
+        </div>
+
+        <div class="disposicion-ruleta">
+          <!-- Ruleta con Canvas -->
+          <div class="contenedor-ruleta">
+            <div class="indicador-triangulo"></div>
+            <canvas id="lienzoRuleta" width="450" height="450"></canvas>
+            <div class="superposicion-click" id="superposicionGirar">
+              haz clic para girarlo
+            </div>
+          </div>
+
+          <!-- Panel Lateral -->
+          <div class="panel-lateral-ruleta">
+            <div class="acciones-superiores">
+              <button id="botonIniciarRuleta" class="btn btn-primario">
+                Iniciar
+              </button>
+              <button id="botonReiniciarRuleta" class="btn btn-secundario">
+                Reiniciar
+              </button>
+            </div>
+
+            <textarea
+              id="areaTextoRuleta"
+              placeholder="Ingrese un elemento por línea..."
+            ></textarea>
+
+            <div class="leyenda-teclas">
+              <p><strong>SPACE</strong> Gíralo</p>
+              <p><strong>S</strong> Ocultar el elemento seleccionado</p>
+              <p><strong>R</strong> Reiniciar</p>
+              <p><strong>E</strong> Editar</p>
+              <p><strong>F</strong> Pantalla completa</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: SORTEO DE EQUIPOS -->
+      <section id="seccionSorteo" class="seccion-pestana">
+        <div id="pantallaConfiguracionSorteo" class="pantalla-sorteo">
+          <h2>
+            Crea equipos al azar a partir de una lista de nombres de forma
+            automática
+          </h2>
+
+          <div class="cuadricula-sorteo">
+            <div class="tarjeta-sorteo">
+              <label><strong>1. Ingresa los participantes</strong></label>
+              <textarea
+                id="areaTextoParticipantes"
+                maxlength="5000"
+                placeholder="Cada participante debe estar en una nueva línea&#10;Agrega un * para indicar líderes de grupo, e.g. *Líder"
+              ></textarea>
+              <div class="contador-participantes">
+                <span id="contadorCantidad">0</span>/100
+              </div>
+              <small>Agrega un * para indicar líderes de grupo (*Líder)</small>
+            </div>
+
+            <div class="tarjeta-sorteo">
+              <label><strong>2. Cómo dividir:</strong></label>
+              <div class="grupo-radio">
+                <label
+                  ><input
+                    type="radio"
+                    name="tipoDivision"
+                    value="equipos"
+                    checked
+                    id="radioCantidadEquipos"
+                  />
+                  Cantidad de equipos</label
+                >
+                <label
+                  ><input
+                    type="radio"
+                    name="tipoDivision"
+                    value="participantes"
+                    id="radioParticipantesPorEquipo"
+                  />
+                  Participantes por equipo</label
+                >
+              </div>
+
+              <select
+                id="desplegableOpcionesDivision"
+                class="control-seleccion"
+              ></select>
+
+              <label class="margen-superior"><strong>3. Título</strong></label>
+              <input
+                type="text"
+                id="campoTituloSorteo"
+                class="control-texto"
+                placeholder="Copa del Mundo Qatar 2022"
+              />
+            </div>
+          </div>
+
+          <div class="acciones-formulario">
+            <button id="botonLimpiarSorteo" class="btn btn-texto">
+              Limpiar
+            </button>
+            <button id="botonGenerarEquipos" class="btn btn-destacado">
+              Generar equipos
+            </button>
+          </div>
+        </div>
+
+        <div id="pantallaResultadosSorteo" class="pantalla-sorteo oculta">
+          <h2 id="tituloResultadosMuestreado">Resultados del Sorteo</h2>
+          <div id="contenedorTarjetasEquipos" class="contenedor-equipos"></div>
+
+          <div class="acciones-resultados">
+            <button id="botonDescargarJPG" class="btn btn-secundario">
+              Descargar JPG
+            </button>
+            <button id="botonCopiarPortapapeles" class="btn btn-secundario">
+              Copiar al portapapeles
+            </button>
+            <button id="botonCopiarColumnas" class="btn btn-secundario">
+              Copiar en columnas
+            </button>
+            <button id="botonVolverSorteo" class="btn btn-primario">
+              Volver a configurar
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
